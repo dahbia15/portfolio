@@ -1,67 +1,67 @@
 document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
 
-  // 0. قائمة التنقل للهاتف مع إبقاء Header وزر FR/EN واضحين
-  const siteHeader = document.querySelector(".site-header");
-  const navWrapper = document.querySelector(".nav-wrapper");
-  const navLinks = document.querySelector(".nav-links");
-  const langSwitch = document.querySelector(".lang-switch");
+  // 1. Light / Dark Mode
+  const themeToggle = document.getElementById("theme-toggle");
 
-  let mobileMenuBtn = document.querySelector(".mobile-menu-toggle");
-
-  if (navWrapper && navLinks && !mobileMenuBtn) {
-    mobileMenuBtn = document.createElement("button");
-    mobileMenuBtn.type = "button";
-    mobileMenuBtn.className = "mobile-menu-toggle";
-    mobileMenuBtn.setAttribute("aria-label", "Menu");
-    mobileMenuBtn.setAttribute("aria-expanded", "false");
-    mobileMenuBtn.textContent = "☰";
-
-    if (langSwitch) {
-      navWrapper.insertBefore(mobileMenuBtn, langSwitch);
+  function applyTheme(mode) {
+    if (mode === "dark") {
+      body.classList.remove("light-mode");
+      if (themeToggle) themeToggle.textContent = "☀️";
+      localStorage.setItem("theme", "dark");
     } else {
-      navWrapper.appendChild(mobileMenuBtn);
+      body.classList.add("light-mode");
+      if (themeToggle) themeToggle.textContent = "🌙";
+      localStorage.setItem("theme", "light");
     }
   }
 
-  function closeMobileMenu() {
-    if (navLinks && mobileMenuBtn) {
-      navLinks.classList.remove("open");
-      mobileMenuBtn.setAttribute("aria-expanded", "false");
-      mobileMenuBtn.textContent = "☰";
-    }
-  }
+  const savedTheme = localStorage.getItem("theme") || "light";
+  applyTheme(savedTheme);
 
-  if (mobileMenuBtn && navLinks) {
-    mobileMenuBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isOpen = navLinks.classList.toggle("open");
-      mobileMenuBtn.setAttribute("aria-expanded", String(isOpen));
-      mobileMenuBtn.textContent = isOpen ? "✕" : "☰";
-    });
-
-    navLinks.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", closeMobileMenu);
-    });
-
-    document.addEventListener("click", (e) => {
-      if (
-        navLinks.classList.contains("open") &&
-        !navLinks.contains(e.target) &&
-        !mobileMenuBtn.contains(e.target)
-      ) {
-        closeMobileMenu();
-      }
-    });
-
-    window.addEventListener("resize", () => {
-      if (window.innerWidth > 768) {
-        closeMobileMenu();
-      }
+  if (themeToggle) {
+    themeToggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      const isLight = body.classList.contains("light-mode");
+      applyTheme(isLight ? "dark" : "light");
     });
   }
 
-  // 1. Animation d'apparition au défilement (Scroll Reveal)
+  // 2. Switch FR / EN
+  const langButtons = document.querySelectorAll(".lang-btn");
+  const translatableElements = document.querySelectorAll("[data-fr][data-en]");
+
+  function setLanguage(lang) {
+    const targetLang = lang === "en" ? "en" : "fr";
+
+    translatableElements.forEach((el) => {
+      const text = el.getAttribute(`data-${targetLang}`);
+      if (text !== null) {
+        el.innerHTML = text;
+      }
+    });
+
+    langButtons.forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-lang") === targetLang);
+    });
+
+    document.documentElement.lang = targetLang;
+    document.documentElement.dir = "ltr";
+    localStorage.setItem("siteLang", targetLang);
+  }
+
+  const savedLang = localStorage.getItem("siteLang") || "fr";
+  setLanguage(savedLang);
+
+  langButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const selectedLang = btn.getAttribute("data-lang");
+      setLanguage(selectedLang);
+    });
+  });
+
+  // 3. Scroll Reveal
   const elementsToAnimate = document.querySelectorAll(".info-card, .proof-card, .about-grid");
 
   elementsToAnimate.forEach((el) => {
@@ -70,22 +70,29 @@ document.addEventListener("DOMContentLoaded", () => {
     el.style.transition = "opacity 0.6s ease-out, transform 0.6s ease-out";
   });
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.style.opacity = "1";
-          entry.target.style.transform = "translateY(0)";
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.12 }
-  );
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = "1";
+            entry.target.style.transform = "translateY(0)";
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
 
-  elementsToAnimate.forEach((el) => observer.observe(el));
+    elementsToAnimate.forEach((el) => observer.observe(el));
+  } else {
+    elementsToAnimate.forEach((el) => {
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+    });
+  }
 
-  // 2. Lightbox pour agrandir les images des preuves visuelles
+  // 4. Lightbox images
   const proofImages = document.querySelectorAll(".proof-card img");
 
   const lightbox = document.createElement("div");
@@ -128,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
     lightbox.style.display = "none";
   });
 
-  // 3. Copie rapide de l'adresse e-mail au clic dans le footer
+  // 5. Copie rapide e-mail
   const footerText = document.querySelector("#contact p");
   if (footerText) {
     footerText.style.cursor = "pointer";
@@ -136,87 +143,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     footerText.addEventListener("click", () => {
       const email = "dahbiaelfajraoui@gmail.com";
-      navigator.clipboard.writeText(email).then(() => {
-        const originalText = footerText.innerHTML;
-        footerText.innerHTML = "✅ E-mail copié : <strong>" + email + "</strong>";
-        setTimeout(() => {
-          footerText.innerHTML = originalText;
-        }, 2500);
-      });
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(email).then(() => {
+          const originalText = footerText.innerHTML;
+          footerText.innerHTML = "✅ E-mail copié : <strong>" + email + "</strong>";
+          setTimeout(() => {
+            footerText.innerHTML = originalText;
+          }, 2500);
+        });
+      }
     });
   }
 
-  // 4. Effet dynamique sur le header au scroll
+  // 6. Shadow header au scroll
+  const header = document.querySelector(".site-header");
   window.addEventListener("scroll", () => {
-    if (!siteHeader) return;
+    if (!header) return;
     if (window.scrollY > 50) {
-      siteHeader.style.boxShadow = "0 4px 20px rgba(0, 0, 0, 0.08)";
+      header.style.boxShadow = "0 4px 20px rgba(0, 0, 0, 0.14)";
     } else {
-      siteHeader.style.boxShadow = "none";
+      header.style.boxShadow = "none";
     }
   });
 
-  // 5. Gestion Light / Dark Mode (Light mode par défaut)
-  const themeToggle = document.getElementById("theme-toggle");
-  const savedTheme = localStorage.getItem("theme");
-
-  if (savedTheme === "dark") {
-    body.classList.remove("light-mode");
-    if (themeToggle) themeToggle.textContent = "☀️";
-  } else {
-    body.classList.add("light-mode");
-    localStorage.setItem("theme", "light");
-    if (themeToggle) themeToggle.textContent = "🌙";
-  }
-
-  if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
-      const isLight = body.classList.toggle("light-mode");
-      if (isLight) {
-        themeToggle.textContent = "🌙";
-        localStorage.setItem("theme", "light");
-      } else {
-        themeToggle.textContent = "☀️";
-        localStorage.setItem("theme", "dark");
-      }
-    });
-  }
-
-  // 6. Gestion Switch FR / EN
-  const langButtons = document.querySelectorAll(".lang-btn");
-  const translatableElements = document.querySelectorAll("[data-fr][data-en]");
-
-  function setLanguage(lang) {
-    const validLang = lang === "en" ? "en" : "fr";
-
-    translatableElements.forEach((el) => {
-      const text = el.getAttribute(`data-${validLang}`);
-      if (text) {
-        el.innerHTML = text;
-      }
-    });
-
-    langButtons.forEach((btn) => {
-      btn.classList.toggle("active", btn.getAttribute("data-lang") === validLang);
-    });
-
-    document.documentElement.lang = validLang;
-    document.documentElement.dir = "ltr";
-    localStorage.setItem("siteLang", validLang);
-  }
-
-  const savedLang = localStorage.getItem("siteLang") || "fr";
-  setLanguage(savedLang);
-
-  langButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const selectedLang = btn.getAttribute("data-lang");
-      setLanguage(selectedLang);
-      closeMobileMenu();
-    });
-  });
-
-  // 7. Animation 3D Tilt sur les cartes (bureau uniquement)
+  // 7. 3D Tilt (desktop uniquement)
   const tiltCards = document.querySelectorAll(".info-card, .proof-card");
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
@@ -249,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 8. Gestion Avatar 3D Stylisé (Three.js + GSAP)
+  // 8. Avatar 3D Modal
   const avatarImg = document.querySelector(".img-avatar");
   const avatarModal = document.getElementById("avatar-modal");
   const closeModalBtn = avatarModal ? avatarModal.querySelector(".close-modal") : null;
