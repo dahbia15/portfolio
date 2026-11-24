@@ -61,6 +61,35 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Menu mobile
+  const menuToggle = document.getElementById("menu-toggle");
+  const navLinks = document.querySelector(".nav-links");
+
+  if (menuToggle && navLinks) {
+    menuToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = navLinks.classList.toggle("open");
+      menuToggle.setAttribute("aria-expanded", String(isOpen));
+      menuToggle.textContent = isOpen ? "✕" : "☰";
+    });
+
+    navLinks.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        navLinks.classList.remove("open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.textContent = "☰";
+      });
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+        navLinks.classList.remove("open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.textContent = "☰";
+      }
+    });
+  }
+
   // 3. Scroll Reveal
   const elementsToAnimate = document.querySelectorAll(".info-card, .proof-card, .about-grid");
 
@@ -367,7 +396,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (model && typeof gsap !== "undefined" && !gsap.isTweening(model.rotation)) {
-        
         model.rotation.y = Math.sin(t * 0.9) * 0.14;
       }
 
@@ -425,31 +453,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-// Menu mobile
-  const menuToggle = document.getElementById("menu-toggle");
-  const navLinks = document.querySelector(".nav-links");
-
-  if (menuToggle && navLinks) {
-    menuToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isOpen = navLinks.classList.toggle("open");
-      menuToggle.setAttribute("aria-expanded", String(isOpen));
-      menuToggle.textContent = isOpen ? "✕" : "☰";
-    });
-
-    navLinks.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        navLinks.classList.remove("open");
-        menuToggle.setAttribute("aria-expanded", "false");
-        menuToggle.textContent = "☰";
-      });
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
-        navLinks.classList.remove("open");
-        menuToggle.setAttribute("aria-expanded", "false");
-        menuToggle.textContent = "☰";
-      }
-    });
-  }
