@@ -1,6 +1,66 @@
 document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
 
+  // 0. قائمة التنقل للهاتف مع إبقاء Header وزر FR/EN واضحين
+  const siteHeader = document.querySelector(".site-header");
+  const navWrapper = document.querySelector(".nav-wrapper");
+  const navLinks = document.querySelector(".nav-links");
+  const langSwitch = document.querySelector(".lang-switch");
+
+  let mobileMenuBtn = document.querySelector(".mobile-menu-toggle");
+
+  if (navWrapper && navLinks && !mobileMenuBtn) {
+    mobileMenuBtn = document.createElement("button");
+    mobileMenuBtn.type = "button";
+    mobileMenuBtn.className = "mobile-menu-toggle";
+    mobileMenuBtn.setAttribute("aria-label", "Menu");
+    mobileMenuBtn.setAttribute("aria-expanded", "false");
+    mobileMenuBtn.textContent = "☰";
+
+    if (langSwitch) {
+      navWrapper.insertBefore(mobileMenuBtn, langSwitch);
+    } else {
+      navWrapper.appendChild(mobileMenuBtn);
+    }
+  }
+
+  function closeMobileMenu() {
+    if (navLinks && mobileMenuBtn) {
+      navLinks.classList.remove("open");
+      mobileMenuBtn.setAttribute("aria-expanded", "false");
+      mobileMenuBtn.textContent = "☰";
+    }
+  }
+
+  if (mobileMenuBtn && navLinks) {
+    mobileMenuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = navLinks.classList.toggle("open");
+      mobileMenuBtn.setAttribute("aria-expanded", String(isOpen));
+      mobileMenuBtn.textContent = isOpen ? "✕" : "☰";
+    });
+
+    navLinks.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", closeMobileMenu);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (
+        navLinks.classList.contains("open") &&
+        !navLinks.contains(e.target) &&
+        !mobileMenuBtn.contains(e.target)
+      ) {
+        closeMobileMenu();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 768) {
+        closeMobileMenu();
+      }
+    });
+  }
+
   // 1. Animation d'apparition au défilement (Scroll Reveal)
   const elementsToAnimate = document.querySelectorAll(".info-card, .proof-card, .about-grid");
 
@@ -20,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     },
-    { threshold: 0.15 }
+    { threshold: 0.12 }
   );
 
   elementsToAnimate.forEach((el) => observer.observe(el));
@@ -36,17 +96,18 @@ document.addEventListener("DOMContentLoaded", () => {
     left: "0",
     width: "100%",
     height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.85)",
+    backgroundColor: "rgba(0, 0, 0, 0.88)",
     display: "none",
     justifyContent: "center",
     alignItems: "center",
+    padding: "16px",
     zIndex: "9999",
     cursor: "zoom-out",
   });
 
   const lightboxImg = document.createElement("img");
   Object.assign(lightboxImg.style, {
-    maxWidth: "90%",
+    maxWidth: "92%",
     maxHeight: "85%",
     borderRadius: "10px",
     boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
@@ -86,13 +147,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 4. Effet dynamique sur le header au scroll
-  const header = document.querySelector(".site-header");
   window.addEventListener("scroll", () => {
-    if (!header) return;
+    if (!siteHeader) return;
     if (window.scrollY > 50) {
-      header.style.boxShadow = "0 4px 20px rgba(0, 0, 0, 0.08)";
+      siteHeader.style.boxShadow = "0 4px 20px rgba(0, 0, 0, 0.08)";
     } else {
-      header.style.boxShadow = "none";
+      siteHeader.style.boxShadow = "none";
     }
   });
 
@@ -127,19 +187,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const translatableElements = document.querySelectorAll("[data-fr][data-en]");
 
   function setLanguage(lang) {
+    const validLang = lang === "en" ? "en" : "fr";
+
     translatableElements.forEach((el) => {
-      const text = el.getAttribute(`data-${lang}`);
+      const text = el.getAttribute(`data-${validLang}`);
       if (text) {
         el.innerHTML = text;
       }
     });
 
     langButtons.forEach((btn) => {
-      btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
+      btn.classList.toggle("active", btn.getAttribute("data-lang") === validLang);
     });
 
-    document.documentElement.lang = lang;
-    localStorage.setItem("siteLang", lang);
+    document.documentElement.lang = validLang;
+    document.documentElement.dir = "ltr";
+    localStorage.setItem("siteLang", validLang);
   }
 
   const savedLang = localStorage.getItem("siteLang") || "fr";
@@ -149,10 +212,11 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => {
       const selectedLang = btn.getAttribute("data-lang");
       setLanguage(selectedLang);
+      closeMobileMenu();
     });
   });
 
-  // 7. Animation 3D Tilt sur les cartes
+  // 7. Animation 3D Tilt sur les cartes (bureau uniquement)
   const tiltCards = document.querySelectorAll(".info-card, .proof-card");
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
