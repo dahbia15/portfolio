@@ -884,3 +884,159 @@ body.light-mode .avatar-greeting p {
     font-size: 2.1rem;
   }
 }
+.menu-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid rgba(198, 161, 91, 0.45);
+  color: #C6A15B;
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+body.light-mode .menu-toggle {
+  color: #26211d;
+  border-color: rgba(156, 114, 45, 0.45);
+}
+
+@media (max-width: 850px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .nav-wrapper {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    height: 64px;
+    min-height: 64px;
+    gap: 8px;
+  }
+
+  .brand {
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .lang-switch {
+    padding: 2px;
+  }
+
+  .lang-btn {
+    padding: 4px 7px;
+    font-size: 0.68rem;
+  }
+
+  .theme-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 10, 0.98);
+    border-bottom: 1px solid rgba(198, 161, 91, 0.35);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px 16px 14px;
+    z-index: 99;
+  }
+
+  body.light-mode .nav-links {
+    background: rgba(255, 253, 249, 0.98);
+    border-bottom-color: #e6dccb;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 11px 4px;
+    border-bottom: 1px solid rgba(198, 161, 91, 0.14);
+    font-size: 0.74rem;
+    letter-spacing: 1.5px;
+  }
+
+  .nav-links a:last-child {
+    border-bottom: none;
+  }
+
+  .hero {
+    padding: 52px 0 50px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.4rem, 11vw, 3.5rem);
+  }
+
+  .hero h2 {
+    font-size: 1.25rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn {
+    text-align: center;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .about-images {
+    padding: 10px;
+  }
+
+  .about-images::before {
+    inset: -4px;
+  }
+
+  .proofs-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .proof-card img {
+    height: 280px !important;
+  }
+
+  .hero::after {
+    font-size: 4.5rem;
+    right: -18px;
+    bottom: -12px;
+  }
+
+  .section {
+    padding: 52px 0;
+  }
+
+  .section h3,
+  .about-content h3,
+  .site-footer h3 {
+    font-size: 2rem;
+  }
+}
